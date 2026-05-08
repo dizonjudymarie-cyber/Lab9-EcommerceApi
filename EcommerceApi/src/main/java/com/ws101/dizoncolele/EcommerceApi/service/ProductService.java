@@ -1,5 +1,6 @@
 package com.ws101.dizoncolele.EcommerceApi.service;
 
+import com.ws101.dizoncolele.EcommerceApi.dto.CreateProductDto;
 import com.ws101.dizoncolele.EcommerceApi.model.Product;
 import com.ws101.dizoncolele.EcommerceApi.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -8,8 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Service Layer using JPA Repository
- * Replaces ArrayList logic
+ * Service Layer using JPA Repository + DTO Support
  */
 @Service
 public class ProductService {
@@ -20,23 +20,40 @@ public class ProductService {
         this.repo = repo;
     }
 
-    // GET ALL
+    // =========================
+    // EXISTING METHODS (UNCHANGED)
+    // =========================
+
     public List<Product> getAllProducts() {
         return repo.findAll();
     }
 
-    // GET BY ID
     public Product getProduct(Long id) {
         return repo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
     }
 
-    // CREATE
+    public void delete(Long id) {
+        repo.deleteById(id);
+    }
+
+    public List<Product> getByCategory(String name) {
+        return repo.findByCategoryName(name);
+    }
+
+    public List<Product> getByPriceRange(double min, double max) {
+        return repo.findProductsByPriceRange(min, max);
+    }
+
+    // =========================
+    // EXISTING ENTITY METHODS
+    // (keep for backward compatibility)
+    // =========================
+
     public Product create(Product product) {
         return repo.save(product);
     }
 
-    // UPDATE
     public Product update(Long id, Product updated) {
         Product existing = getProduct(id);
         existing.setName(updated.getName());
@@ -44,18 +61,28 @@ public class ProductService {
         return repo.save(existing);
     }
 
-    // DELETE
-    public void delete(Long id) {
-        repo.deleteById(id);
+    // =========================
+    // DTO METHODS (NEW - REQUIRED FOR LAB 9)
+    // =========================
+
+    public Product createFromDto(CreateProductDto dto) {
+        Product product = new Product();
+        product.setName(dto.prodName());
+        product.setPrice(dto.prodPrice());
+        product.setDescription(dto.prodDescription());
+        product.setQuantity(dto.quantity());
+
+        return repo.save(product);
     }
 
-    // FILTER BY CATEGORY
-    public List<Product> getByCategory(String name) {
-        return repo.findByCategoryName(name);
-    }
+    public Product updateFromDto(Long id, CreateProductDto dto) {
+        Product existing = getProduct(id);
 
-    // FILTER BY PRICE RANGE
-    public List<Product> getByPriceRange(double min, double max) {
-        return repo.findProductsByPriceRange(min, max);
+        existing.setName(dto.prodName());
+        existing.setPrice(dto.prodPrice());
+        existing.setDescription(dto.prodDescription());
+        existing.setQuantity(dto.quantity());
+
+        return repo.save(existing);
     }
 }

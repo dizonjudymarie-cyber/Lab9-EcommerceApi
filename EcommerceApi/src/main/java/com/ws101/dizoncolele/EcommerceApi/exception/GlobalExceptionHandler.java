@@ -1,27 +1,32 @@
 package com.ws101.dizoncolele.EcommerceApi.exception;
 
-import jakarta.persistence.EntityNotFoundException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
-/**
- * Global Exception Handler
- */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(EntityNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFound(EntityNotFoundException ex) {
-        return Map.of("error", ex.getMessage());
-    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationErrors(
+            MethodArgumentNotValidException ex) {
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleBadRequest(DataIntegrityViolationException ex) {
-        return Map.of("error", "Invalid data input");
+        List<String> errors = new ArrayList<>();
+
+        ex.getBindingResult().getFieldErrors()
+                .forEach(error ->
+                        errors.add(error.getField() + ": " + error.getDefaultMessage())
+                );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now().toString());
+        response.put("status", 400);
+        response.put("errors", errors);
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }
