@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<body>
+
+<h2>Login</h2>
+
+<form id="loginForm" method="POST" action="/login">
+
+    <!-- CSRF TOKEN (REQUIRED) -->
+    <input type="hidden" name="_csrf" id="csrfToken">
+
+    <input type="text" name="username" placeholder="Username" required />
+    <input type="password" name="password" placeholder="Password" required />
+
+    <button type="submit">Login</button>
+</form>
+
+<script>
+async function loadCsrf() {
+    const response = await fetch("/login", {
+        method: "GET",
+        credentials: "include"
+    });
+
+    const text = await response.text();
+
+    // Extract CSRF token from HTML response
+    const match = text.match(/name="_csrf" value="(.+?)"/);
+
+    if (match) {
+        document.getElementById("csrfToken").value = match[1];
+    }
+}
+
+loadCsrf();
+</script>
+
+</body>
+</html>
