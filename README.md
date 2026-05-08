@@ -3,6 +3,7 @@
 ## 👤 Author
 
 **Name:** Dizon, Judy Marie A.
+Colele, Shella Mae
 **Course:** WS101
 **Project:** E-Commerce REST API (Spring Boot)
 
